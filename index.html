@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#1a73e8">
+    <meta name="description" content="Smart route planning with carbon footprint tracking and AI-powered travel insights">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- iOS Icons -->
+    <link rel="apple-touch-icon" href="icons/icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="icons/icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="96x96" href="icons/icon-96x96.png">
+    <link rel="apple-touch-icon" sizes="128x128" href="icons/icon-128x128.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="icons/icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192x192.png">
+    <link rel="apple-touch-icon" sizes="384x384" href="icons/icon-384x384.png">
+    <link rel="apple-touch-icon" sizes="512x512" href="icons/icon-512x512.png">
+    
+    <title>GreenPath - Smart Route Planning with Carbon Tracking</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <i class="fas fa-route brand-icon"></i>
+                <span class="brand-name">GreenPath</span>
+            </div>
+            <div class="nav-links">
+                <a href="#" id="askAINav" class="nav-link">
+                    <i class="fas fa-robot"></i>
+                    <span>Ask AI</span>
+                </a>
+                <a href="index.html" class="nav-link active">
+                    <i class="fas fa-map"></i>
+                    <span>Map</span>
+                </a>
+                <a href="about.html" class="nav-link">
+                    <i class="fas fa-info-circle"></i>
+                    <span>About</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="app-container">
+        <header class="header">
+            <h1>GreenPath</h1>
+            <button class="menu-toggle" id="menuToggle">☰</button>
+        </header>
+        
+        <div class="sidebar" id="sidebar">
+            <div class="mobile-drag-handle" id="dragHandle">
+                <div class="drag-indicator"></div>
+            </div>
+            <div class="search-container">
+                <!-- Single Search Bar -->
+                <div class="search-box-main">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="mainSearchInput" placeholder="Search for places or addresses...">
+                    <button id="clearSearchBtn" class="clear-search-btn" style="display: none;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <!-- Search Suggestions Dropdown -->
+                <div class="search-suggestions" id="searchSuggestions" style="display: none;"></div>
+                
+                <!-- Nearby Places / Route Planning -->
+                <div class="content-area" id="contentArea">
+                    <!-- Will show nearby places or route details -->
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button id="locationBtn" class="control-btn">
+                    <i class="fas fa-location-arrow"></i>
+                    <span>Location</span>
+                </button>
+                <button id="clearBtn" class="control-btn">
+                    <i class="fas fa-trash-alt"></i>
+                    <span>Clear</span>
+                </button>
+                <button id="carbonBtn" class="control-btn carbon-btn">
+                    <i class="fas fa-leaf"></i>
+                    <span>Carbon</span>
+                </button>
+            </div>
+            
+            <!-- Route Information -->
+            <div class="route-info" id="routeInfo" style="display: none;">
+                <h3><i class="fas fa-route"></i> Route Information</h3>
+                <div class="info-item">
+                    <span class="info-label"><i class="fas fa-road"></i> Distance:</span>
+                    <span class="info-value" id="routeDistance">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label"><i class="fas fa-clock"></i> Estimated Time:</span>
+                    <span class="info-value" id="routeTime">-</span>
+                </div>
+                <button id="startNavBtn" class="start-nav-btn" style="display: none;" disabled>
+                    <i class="fas fa-location-arrow"></i>
+                    <span>Start Navigation</span>
+                </button>
+            </div>
+            
+            <!-- Turn-by-Turn Directions - REMOVED -->
+            <!-- No longer needed, navigation panel shows live directions -->
+            
+            <!-- Carbon Footprint Calculator -->
+            <div class="carbon-calculator" id="carbonCalculator" style="display: none;">
+                <h3><i class="fas fa-leaf"></i> Carbon Calculator</h3>
+                
+                <div class="carbon-form">
+                    <label><i class="fas fa-car"></i> Vehicle Type:</label>
+                    <select id="vehicleType" class="carbon-select">
+                        <option value="car-petrol">Petrol Car</option>
+                        <option value="car-diesel">Diesel Car</option>
+                        <option value="car-electric">Electric Car</option>
+                        <option value="car-hybrid">Hybrid Car</option>
+                        <option value="motorcycle">Motorcycle</option>
+                        <option value="bus">Bus</option>
+                        <option value="train">Train</option>
+                        <option value="flight">Flight</option>
+                    </select>
+                    
+                    <label><i class="fas fa-tachometer-alt"></i> Your Vehicle Mileage (km/L):</label>
+                    <input type="number" id="vehicleMileage" class="carbon-select" placeholder="e.g., 15" min="1" step="0.1">
+                    <small class="mileage-note">Leave empty to use average mileage for selected vehicle type</small>
+                    
+                    <label><i class="fas fa-ruler"></i> Route Distance: <span id="distanceDisplay">Set route first</span></label>
+                    
+                    <button id="calculateBtn" class="calculate-btn" disabled>
+                        <i class="fas fa-calculator"></i>
+                        <span>Calculate Impact</span>
+                    </button>
+                    
+                    <div class="carbon-result" id="carbonResult" style="display: none;">
+                        <div class="result-item">
+                            <span class="result-label"><i class="fas fa-road"></i> Route Distance:</span>
+                            <span class="result-value" id="resultDistance">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label"><i class="fas fa-tachometer-alt"></i> Vehicle Mileage:</span>
+                            <span class="result-value" id="resultMileage">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label"><i class="fas fa-gas-pump"></i> Fuel Needed:</span>
+                            <span class="result-value" id="resultFuel">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label"><i class="fas fa-smog"></i> CO₂ Emissions:</span>
+                            <span class="result-value highlight" id="resultEmissions">-</span>
+                        </div>
+                        <div class="result-comparison">
+                            <i class="fas fa-tree"></i>
+                            <small id="comparisonText">-</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="map-container">
+            <div id="map"></div>
+            <div class="loading" id="loading">
+                <div class="loading-spinner"></div>
+                <span>Loading...</span>
+            </div>
+            
+            <!-- Floating expand button (shown when sidebar is minimized) -->
+            <button class="expand-map-btn" id="expandMapBtn" style="display: none;">
+                <i class="fas fa-chevron-up"></i>
+                <span>Show Panel</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Ask AI Modal -->
+    <div class="ai-modal" id="aiModal" style="display: none;">
+        <div class="ai-modal-content">
+            <div class="ai-modal-header">
+                <h3><i class="fas fa-robot"></i> Ask AI About Your Route</h3>
+                <button class="ai-modal-close" id="closeAIModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="ai-modal-body">
+                <div class="ai-chat-messages" id="aiModalMessages"></div>
+                <div class="ai-chat-input-container">
+                    <input type="text" id="aiModalInput" placeholder="Ask about routes, destinations, travel tips...">
+                    <button id="sendAIModalBtn">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="script.js"></script>
+    
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then((registration) => {
+                        console.log('ServiceWorker registration successful:', registration.scope);
+                    })
+                    .catch((error) => {
+                        console.log('ServiceWorker registration failed:', error);
+                    });
+            });
+        }
+        
+        // Install prompt for PWA
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Show install button in navbar if needed
+            console.log('PWA install prompt available');
+        });
+    </script>
+</body>
+</html>

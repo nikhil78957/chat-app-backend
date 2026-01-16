@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoRoute Methodology Diagram</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 40px;
+            background: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .diagram-container {
+            width: 1400px;
+            background: white;
+            padding: 40px;
+        }
+        
+        .title {
+            text-align: center;
+            font-size: 42px;
+            font-weight: 700;
+            color: #1a73e8;
+            margin-bottom: 40px;
+        }
+        
+        .architecture {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+        
+        .layer {
+            background: linear-gradient(135deg, #e8f0fe, #f8f9fa);
+            border: 3px solid #1a73e8;
+            border-radius: 15px;
+            padding: 25px;
+            position: relative;
+        }
+        
+        .layer-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a73e8;
+            margin-bottom: 20px;
+            text-align: center;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #1a73e8;
+        }
+        
+        .layer-item {
+            background: white;
+            padding: 12px 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #1e8e3e;
+            font-size: 16px;
+            color: #3c4043;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .arrow-right {
+            position: absolute;
+            right: -30px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 40px;
+            color: #1a73e8;
+        }
+        
+        .phases {
+            margin-top: 50px;
+        }
+        
+        .phases-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1a73e8;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .phase-flow {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .phase {
+            background: linear-gradient(135deg, #e8f5e9, #f8f9fa);
+            border: 3px solid #1e8e3e;
+            border-radius: 15px;
+            padding: 20px 30px;
+            position: relative;
+        }
+        
+        .phase-number {
+            position: absolute;
+            left: -20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #1a73e8, #1e8e3e);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 700;
+            border: 4px solid white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .phase-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1e8e3e;
+            margin-bottom: 12px;
+            margin-left: 40px;
+        }
+        
+        .phase-content {
+            margin-left: 40px;
+            font-size: 16px;
+            color: #3c4043;
+            line-height: 1.6;
+        }
+        
+        .arrow-down {
+            text-align: center;
+            font-size: 40px;
+            color: #1e8e3e;
+            margin: -10px 0;
+        }
+        
+        .tech-stack {
+            margin-top: 50px;
+            background: linear-gradient(135deg, #e8f0fe, #e8f5e9);
+            border: 3px solid #1a73e8;
+            border-radius: 15px;
+            padding: 30px;
+        }
+        
+        .tech-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a73e8;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+        
+        .tech-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 600;
+            color: #3c4043;
+            border: 2px solid #dadce0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .download-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #1a73e8, #1e8e3e);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+        
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+        }
+        
+        @media print {
+            .download-btn {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="download-btn" onclick="downloadImage()">📥 Download as Image</button>
+    
+    <div class="diagram-container" id="diagram">
+        <h1 class="title">EcoRoute Methodology</h1>
+        
+        <!-- System Architecture -->
+        <div class="architecture">
+            <div class="layer">
+                <div class="layer-title">Frontend Layer</div>
+                <div class="layer-item">HTML5 / CSS3</div>
+                <div class="layer-item">JavaScript ES6+</div>
+                <div class="layer-item">Leaflet.js</div>
+                <div class="layer-item">Responsive Design</div>
+                <div class="layer-item">PWA Features</div>
+                <div class="arrow-right">→</div>
+            </div>
+            
+            <div class="layer">
+                <div class="layer-title">Backend Layer</div>
+                <div class="layer-item">PHP Server</div>
+                <div class="layer-item">API Proxy</div>
+                <div class="layer-item">Config Management</div>
+                <div class="layer-item">Security Layer</div>
+                <div class="layer-item">RESTful Endpoints</div>
+                <div class="arrow-right">→</div>
+            </div>
+            
+            <div class="layer">
+                <div class="layer-title">External APIs</div>
+                <div class="layer-item">OpenStreetMap</div>
+                <div class="layer-item">OSRM Routing</div>
+                <div class="layer-item">Nominatim</div>
+                <div class="layer-item">OpenRouter AI</div>
+                <div class="layer-item">DeepSeek R1</div>
+            </div>
+        </div>
+        
+        <!-- Implementation Phases -->
+        <div class="phases">
+            <h2 class="phases-title">Implementation Phases</h2>
+            
+            <div class="phase-flow">
+                <div class="phase">
+                    <div class="phase-number">1</div>
+                    <div class="phase-title">Core Navigation System</div>
+                    <div class="phase-content">
+                        Initialize Leaflet map • Implement geocoding • Integrate OSRM routing • Display routes with markers • Calculate distance & time
+                    </div>
+                </div>
+                
+                <div class="arrow-down">↓</div>
+                
+                <div class="phase">
+                    <div class="phase-number">2</div>
+                    <div class="phase-title">Carbon Footprint Calculator</div>
+                    <div class="phase-content">
+                        Define emission factors for 8 vehicle types • Custom mileage input • Calculate fuel consumption • Compute tree offsets • Generate comparisons
+                    </div>
+                </div>
+                
+                <div class="arrow-down">↓</div>
+                
+                <div class="phase">
+                    <div class="phase-number">3</div>
+                    <div class="phase-title">AI Integration</div>
+                    <div class="phase-content">
+                        Secure backend API proxy • Background preloading • Modal chat interface • Markdown formatting • Response caching
+                    </div>
+                </div>
+                
+                <div class="arrow-down">↓</div>
+                
+                <div class="phase">
+                    <div class="phase-number">4</div>
+                    <div class="phase-title">Turn-by-Turn Navigation</div>
+                    <div class="phase-content">
+                        Request step-by-step directions • Parse maneuvers • Generate instructions • Interactive direction list • Click-to-zoom
+                    </div>
+                </div>
+                
+                <div class="arrow-down">↓</div>
+                
+                <div class="phase">
+                    <div class="phase-number">5</div>
+                    <div class="phase-title">Progressive Web App</div>
+                    <div class="phase-content">
+                        Create manifest.json • Implement service worker • Register caching • Generate icons • Enable installation
+                    </div>
+                </div>
+                
+                <div class="arrow-down">↓</div>
+                
+                <div class="phase">
+                    <div class="phase-number">6</div>
+                    <div class="phase-title">Mobile Optimization</div>
+                    <div class="phase-content">
+                        Bottom-sheet interface • Drag-to-minimize • Touch-optimized buttons • Collapsible panels • Scroll optimization
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Technology Stack -->
+        <div class="tech-stack">
+            <h3 class="tech-title">Technology Stack</h3>
+            <div class="tech-grid">
+                <div class="tech-item">HTML5</div>
+                <div class="tech-item">CSS3</div>
+                <div class="tech-item">JavaScript</div>
+                <div class="tech-item">PHP</div>
+                <div class="tech-item">Leaflet.js</div>
+                <div class="tech-item">OpenStreetMap</div>
+                <div class="tech-item">OSRM API</div>
+                <div class="tech-item">OpenRouter AI</div>
+                <div class="tech-item">Nominatim</div>
+                <div class="tech-item">Service Worker</div>
+                <div class="tech-item">PWA</div>
+                <div class="tech-item">Font Awesome</div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script>
+        function downloadImage() {
+            const button = document.querySelector('.download-btn');
+            button.style.display = 'none';
+            
+            html2canvas(document.getElementById('diagram'), {
+                scale: 2,
+                backgroundColor: '#ffffff',
+                logging: false
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'ecoroute-methodology.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                
+                button.style.display = 'block';
+            });
+        }
+        
+        // Alternative: Print to PDF
+        window.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'p') {
+                e.preventDefault();
+                window.print();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map Debug</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body { margin: 0; padding: 0; font-family: Arial, sans-serif; }
+        #map { height: 100vh; width: 100%; }
+        #debug { position: fixed; top: 10px; right: 10px; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); max-width: 300px; z-index: 1000; }
+        #debug h3 { margin: 0 0 10px 0; color: #1a73e8; }
+        .status { padding: 5px; margin: 5px 0; border-radius: 4px; font-size: 12px; }
+        .status.success { background: #e8f5e9; color: #1e8e3e; }
+        .status.error { background: #fce8e6; color: #d93025; }
+        .status.info { background: #e8f0fe; color: #1a73e8; }
+    </style>
+</head>
+<body>
+    <div id="debug">
+        <h3>🔍 Map Debug Console</h3>
+        <div id="debugOutput"></div>
+    </div>
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        const debugOutput = document.getElementById('debugOutput');
+        
+        function log(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.textContent = message;
+            debugOutput.appendChild(div);
+            console.log(message);
+        }
+
+        try {
+            log('Starting map initialization...', 'info');
+            
+            // Test 1: Check if Leaflet is loaded
+            if (typeof L !== 'undefined') {
+                log('✓ Leaflet library loaded', 'success');
+            } else {
+                log('✗ Leaflet library NOT loaded', 'error');
+                throw new Error('Leaflet not loaded');
+            }
+
+            // Test 2: Initialize map
+            log('Creating map instance...', 'info');
+            const map = L.map('map').setView([40.7128, -74.0060], 10);
+            log('✓ Map instance created', 'success');
+
+            // Test 3: Add tile layer
+            log('Adding tile layer...', 'info');
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 19
+            }).addTo(map);
+            log('✓ Tile layer added', 'success');
+
+            // Test 4: Add a test marker
+            log('Adding test marker...', 'info');
+            const marker = L.marker([40.7128, -74.0060]).addTo(map);
+            marker.bindPopup('Test Marker - Map is working!').openPopup();
+            log('✓ Test marker added', 'success');
+
+            // Test 5: Test custom marker HTML
+            log('Testing custom marker...', 'info');
+            const customMarker = L.marker([40.7200, -74.0100], {
+                icon: L.divIcon({
+                    className: 'custom-marker',
+                    html: `<div style="background: #1a73e8; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>`,
+                    iconSize: [40, 40],
+                    iconAnchor: [20, 40]
+                })
+            }).addTo(map);
+            customMarker.bindPopup('Custom Marker Test');
+            log('✓ Custom marker added', 'success');
+
+            // Test 6: Test new pin marker style
+            log('Testing new pin marker...', 'info');
+            const pinMarker = L.marker([40.7050, -74.0060], {
+                icon: L.divIcon({
+                    className: 'route-marker start-marker',
+                    html: `<div class="marker-container">
+                        <div class="marker-pin start-pin" style="width: 40px; height: 40px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); background: linear-gradient(135deg, #1a73e8 0%, #4285f4 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);">
+                            <i class="fas fa-circle" style="transform: rotate(45deg); color: white; font-size: 18px;"></i>
+                        </div>
+                    </div>`,
+                    iconSize: [40, 50],
+                    iconAnchor: [20, 50]
+                })
+            }).addTo(map);
+            pinMarker.bindPopup('New Pin Style Test');
+            log('✓ New pin marker added', 'success');
+
+            log('🎉 All tests passed! Map is working correctly.', 'success');
+
+        } catch (error) {
+            log('✗ Error: ' + error.message, 'error');
+            console.error('Full error:', error);
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+</body>
+</html>

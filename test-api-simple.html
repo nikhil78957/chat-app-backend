@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple API Test</title>
+    <style>
+        body { font-family: monospace; padding: 20px; }
+        button { padding: 10px 20px; font-size: 16px; }
+        pre { background: #f5f5f5; padding: 15px; border-radius: 5px; overflow-x: auto; }
+        .error { color: red; }
+        .success { color: green; }
+    </style>
+</head>
+<body>
+    <h1>API Test</h1>
+    <button onclick="testAPI()">Test API</button>
+    <div id="output"></div>
+
+    <script>
+        async function testAPI() {
+            const output = document.getElementById('output');
+            output.innerHTML = '<p>Testing...</p>';
+            
+            try {
+                console.log('Sending request...');
+                const response = await fetch('api.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: 'Say hello'
+                    })
+                });
+                
+                console.log('Response status:', response.status);
+                console.log('Response ok:', response.ok);
+                
+                const text = await response.text();
+                console.log('Raw response:', text);
+                
+                output.innerHTML = `
+                    <h2>Response Status: ${response.status}</h2>
+                    <h3>Raw Response:</h3>
+                    <pre>${text}</pre>
+                `;
+                
+                try {
+                    const json = JSON.parse(text);
+                    output.innerHTML += `
+                        <h3 class="success">✓ Valid JSON</h3>
+                        <pre>${JSON.stringify(json, null, 2)}</pre>
+                        <h3>Extracted Content:</h3>
+                        <pre>${json.response?.content || 'NOT FOUND'}</pre>
+                    `;
+                } catch (e) {
+                    output.innerHTML += `
+                        <h3 class="error">✗ Invalid JSON</h3>
+                        <pre>${e.message}</pre>
+                    `;
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                output.innerHTML = `
+                    <h2 class="error">Error</h2>
+                    <pre>${error.message}\n${error.stack}</pre>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

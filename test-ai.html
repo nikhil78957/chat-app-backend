@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        button {
+            padding: 10px 20px;
+            background: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #1557b0;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 4px;
+            white-space: pre-wrap;
+        }
+        .loading {
+            display: none;
+            color: #1a73e8;
+        }
+        .error {
+            color: #d93025;
+        }
+        .success {
+            color: #1e8e3e;
+        }
+    </style>
+</head>
+<body>
+    <h1>AI API Test</h1>
+    
+    <div class="test-section">
+        <h2>Test 1: Simple API Call</h2>
+        <button onclick="testAPI()">Test API Connection</button>
+        <div class="loading" id="loading1">Testing...</div>
+        <div id="result1"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 2: Custom Message</h2>
+        <input type="text" id="customMessage" placeholder="Enter your message..." style="width: 100%; padding: 10px; margin-bottom: 10px;">
+        <button onclick="testCustomMessage()">Send Message</button>
+        <div class="loading" id="loading2">Sending...</div>
+        <div id="result2"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 3: Check Backend</h2>
+        <button onclick="checkBackend()">Check api.php</button>
+        <div id="result3"></div>
+    </div>
+
+    <script>
+        async function testAPI() {
+            const loading = document.getElementById('loading1');
+            const result = document.getElementById('result1');
+            
+            loading.style.display = 'block';
+            result.innerHTML = '';
+            
+            try {
+                console.log('Testing API...');
+                const response = await fetch('api.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: 'Hello! Please respond with "API is working" if you can read this.'
+                    })
+                });
+
+                console.log('Response status:', response.status);
+                console.log('Response ok:', response.ok);
+
+                const data = await response.json();
+                console.log('Response data:', data);
+
+                if (response.ok) {
+                    result.innerHTML = `<div class="success">✓ Success!</div><pre>${JSON.stringify(data, null, 2)}</pre>`;
+                } else {
+                    result.innerHTML = `<div class="error">✗ Error ${response.status}</div><pre>${JSON.stringify(data, null, 2)}</pre>`;
+                }
+            } catch (error) {
+                console.error('Test error:', error);
+                result.innerHTML = `<div class="error">✗ Network Error</div><pre>${error.message}</pre>`;
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        async function testCustomMessage() {
+            const loading = document.getElementById('loading2');
+            const result = document.getElementById('result2');
+            const message = document.getElementById('customMessage').value.trim();
+            
+            if (!message) {
+                alert('Please enter a message');
+                return;
+            }
+            
+            loading.style.display = 'block';
+            result.innerHTML = '';
+            
+            try {
+                const response = await fetch('api.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: message
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    result.innerHTML = `<div class="success">✓ Response received</div><pre>${JSON.stringify(data, null, 2)}</pre>`;
+                } else {
+                    result.innerHTML = `<div class="error">✗ Error ${response.status}</div><pre>${JSON.stringify(data, null, 2)}</pre>`;
+                }
+            } catch (error) {
+                result.innerHTML = `<div class="error">✗ Error</div><pre>${error.message}</pre>`;
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        function checkBackend() {
+            const result = document.getElementById('result3');
+            
+            fetch('api.php', {
+                method: 'GET'
+            })
+            .then(response => response.text())
+            .then(text => {
+                result.innerHTML = `<div class="success">✓ Backend accessible</div><pre>${text}</pre>`;
+            })
+            .catch(error => {
+                result.innerHTML = `<div class="error">✗ Cannot access backend</div><pre>${error.message}</pre>`;
+            });
+        }
+
+        // Auto-run first test on load
+        window.addEventListener('load', () => {
+            console.log('Page loaded, running auto-test...');
+            setTimeout(testAPI, 500);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PWA Test - GreenPath</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            background: #f8f9fa;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border-left: 4px solid #1a73e8;
+        }
+        .pass {
+            color: #1e8e3e;
+            font-weight: bold;
+        }
+        .fail {
+            color: #d93025;
+            font-weight: bold;
+        }
+        .warning {
+            color: #f9ab00;
+            font-weight: bold;
+        }
+        button {
+            padding: 10px 20px;
+            background: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #1765cc;
+        }
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 GreenPath PWA Test Suite</h1>
+    
+    <div class="test-section">
+        <h2>1. HTTPS Check</h2>
+        <p id="httpsCheck">Checking...</p>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. Service Worker</h2>
+        <p id="swCheck">Checking...</p>
+        <button onclick="registerServiceWorker()">Register Service Worker</button>
+        <button onclick="unregisterServiceWorker()">Unregister</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. Manifest</h2>
+        <p id="manifestCheck">Checking...</p>
+        <button onclick="checkManifest()">Check Manifest</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>4. Install Prompt</h2>
+        <p id="installCheck">Checking...</p>
+        <button id="installBtn" style="display: none;">Install App</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>5. Cache Status</h2>
+        <p id="cacheCheck">Checking...</p>
+        <button onclick="checkCache()">Check Cache</button>
+        <button onclick="clearCache()">Clear Cache</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>6. Icons</h2>
+        <p id="iconCheck">Checking...</p>
+        <div id="iconPreview"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test Results Summary</h2>
+        <pre id="summary"></pre>
+    </div>
+
+    <script>
+        let deferredPrompt;
+        const results = {};
+
+        // Check HTTPS
+        function checkHTTPS() {
+            const isHTTPS = window.location.protocol === 'https:';
+            const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            
+            if (isHTTPS || isLocalhost) {
+                document.getElementById('httpsCheck').innerHTML = '<span class="pass">✓ PASS</span> - Site is served over HTTPS or localhost';
+                results.https = true;
+            } else {
+                document.getElementById('httpsCheck').innerHTML = '<span class="fail">✗ FAIL</span> - Site must be served over HTTPS';
+                results.https = false;
+            }
+        }
+
+        // Check Service Worker
+        function checkServiceWorker() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(registrations => {
+                    if (registrations.length > 0) {
+                        document.getElementById('swCheck').innerHTML = '<span class="pass">✓ PASS</span> - Service Worker registered';
+                        results.serviceWorker = true;
+                    } else {
+                        document.getElementById('swCheck').innerHTML = '<span class="warning">⚠ WARNING</span> - Service Worker not registered';
+                        results.serviceWorker = false;
+                    }
+                });
+            } else {
+                document.getElementById('swCheck').innerHTML = '<span class="fail">✗ FAIL</span> - Service Worker not supported';
+                results.serviceWorker = false;
+            }
+        }
+
+        function registerServiceWorker() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(registration => {
+                        alert('Service Worker registered successfully!');
+                        checkServiceWorker();
+                    })
+                    .catch(error => {
+                        alert('Service Worker registration failed: ' + error);
+                    });
+            }
+        }
+
+        function unregisterServiceWorker() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(registrations => {
+                    registrations.forEach(registration => {
+                        registration.unregister();
+                    });
+                    alert('Service Worker unregistered');
+                    checkServiceWorker();
+                });
+            }
+        }
+
+        // Check Manifest
+        function checkManifest() {
+            fetch('/manifest.json')
+                .then(response => response.json())
+                .then(manifest => {
+                    document.getElementById('manifestCheck').innerHTML = 
+                        '<span class="pass">✓ PASS</span> - Manifest found<br>' +
+                        'Name: ' + manifest.name + '<br>' +
+                        'Short Name: ' + manifest.short_name + '<br>' +
+                        'Icons: ' + manifest.icons.length;
+                    results.manifest = true;
+                })
+                .catch(error => {
+                    document.getElementById('manifestCheck').innerHTML = 
+                        '<span class="fail">✗ FAIL</span> - Manifest not found or invalid';
+                    results.manifest = false;
+                });
+        }
+
+        // Check Install Prompt
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            document.getElementById('installCheck').innerHTML = 
+                '<span class="pass">✓ PASS</span> - Install prompt available';
+            document.getElementById('installBtn').style.display = 'inline-block';
+            results.installPrompt = true;
+        });
+
+        document.getElementById('installBtn').addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                alert(`User response: ${outcome}`);
+                deferredPrompt = null;
+            }
+        });
+
+        // Check Cache
+        function checkCache() {
+            if ('caches' in window) {
+                caches.keys().then(cacheNames => {
+                    if (cacheNames.length > 0) {
+                        caches.open(cacheNames[0]).then(cache => {
+                            cache.keys().then(keys => {
+                                document.getElementById('cacheCheck').innerHTML = 
+                                    '<span class="pass">✓ PASS</span> - Cache active<br>' +
+                                    'Cached files: ' + keys.length;
+                                results.cache = true;
+                            });
+                        });
+                    } else {
+                        document.getElementById('cacheCheck').innerHTML = 
+                            '<span class="warning">⚠ WARNING</span> - No cache found';
+                        results.cache = false;
+                    }
+                });
+            } else {
+                document.getElementById('cacheCheck').innerHTML = 
+                    '<span class="fail">✗ FAIL</span> - Cache API not supported';
+                results.cache = false;
+            }
+        }
+
+        function clearCache() {
+            if ('caches' in window) {
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => caches.delete(cacheName))
+                    );
+                }).then(() => {
+                    alert('Cache cleared');
+                    checkCache();
+                });
+            }
+        }
+
+        // Check Icons
+        function checkIcons() {
+            const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
+            const preview = document.getElementById('iconPreview');
+            let foundCount = 0;
+            
+            sizes.forEach(size => {
+                const img = new Image();
+                img.src = `/icons/icon-${size}x${size}.png`;
+                img.width = 48;
+                img.height = 48;
+                img.style.margin = '5px';
+                img.style.border = '1px solid #ddd';
+                img.style.borderRadius = '4px';
+                
+                img.onload = () => {
+                    foundCount++;
+                    preview.appendChild(img);
+                    updateIconCheck(foundCount, sizes.length);
+                };
+                
+                img.onerror = () => {
+                    updateIconCheck(foundCount, sizes.length);
+                };
+            });
+        }
+
+        function updateIconCheck(found, total) {
+            if (found === total) {
+                document.getElementById('iconCheck').innerHTML = 
+                    '<span class="pass">✓ PASS</span> - All ' + total + ' icons found';
+                results.icons = true;
+            } else if (found > 0) {
+                document.getElementById('iconCheck').innerHTML = 
+                    '<span class="warning">⚠ WARNING</span> - Only ' + found + '/' + total + ' icons found';
+                results.icons = false;
+            } else {
+                document.getElementById('iconCheck').innerHTML = 
+                    '<span class="fail">✗ FAIL</span> - No icons found';
+                results.icons = false;
+            }
+        }
+
+        // Update Summary
+        function updateSummary() {
+            const summary = {
+                'HTTPS': results.https ? '✓' : '✗',
+                'Service Worker': results.serviceWorker ? '✓' : '✗',
+                'Manifest': results.manifest ? '✓' : '✗',
+                'Install Prompt': results.installPrompt ? '✓' : '✗',
+                'Cache': results.cache ? '✓' : '✗',
+                'Icons': results.icons ? '✓' : '✗'
+            };
+            
+            document.getElementById('summary').textContent = JSON.stringify(summary, null, 2);
+        }
+
+        // Run all checks
+        window.addEventListener('load', () => {
+            checkHTTPS();
+            checkServiceWorker();
+            checkManifest();
+            checkCache();
+            checkIcons();
+            
+            setTimeout(() => {
+                if (!deferredPrompt) {
+                    document.getElementById('installCheck').innerHTML = 
+                        '<span class="warning">⚠ WARNING</span> - Install prompt not available yet<br>' +
+                        '<small>Visit the site multiple times or check PWA criteria</small>';
+                    results.installPrompt = false;
+                }
+                updateSummary();
+            }, 2000);
+            
+            setInterval(updateSummary, 3000);
+        });
+    </script>
+</body>
+</html>

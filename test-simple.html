@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Map Test</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body { margin: 0; padding: 0; }
+        #map { height: 100vh; width: 100%; }
+        .test-panel {
+            position: fixed;
+            top: 80px;
+            left: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.2);
+            z-index: 1000;
+            max-width: 300px;
+        }
+        .test-btn {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: none;
+            border-radius: 8px;
+            background: #1a73e8;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .test-btn:hover {
+            background: #1557b0;
+        }
+        #console {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 4px;
+            font-size: 11px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .log { padding: 2px 0; }
+        .log.error { color: #d93025; }
+        .log.success { color: #1e8e3e; }
+    </style>
+</head>
+<body>
+    <div class="test-panel">
+        <h3>Map Test Panel</h3>
+        <button class="test-btn" onclick="testBasicMap()">1. Test Basic Map</button>
+        <button class="test-btn" onclick="testNewMarkers()">2. Test New Markers</button>
+        <button class="test-btn" onclick="testRoute()">3. Test Route</button>
+        <button class="test-btn" onclick="testScript()">4. Load Full Script</button>
+        <div id="console"></div>
+    </div>
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        let map;
+        const consoleEl = document.getElementById('console');
+        
+        function log(msg, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `log ${type}`;
+            div.textContent = msg;
+            consoleEl.appendChild(div);
+            consoleEl.scrollTop = consoleEl.scrollHeight;
+            console.log(msg);
+        }
+
+        function testBasicMap() {
+            try {
+                log('Testing basic map...', 'info');
+                if (map) {
+                    map.remove();
+                }
+                map = L.map('map').setView([40.7128, -74.0060], 10);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap',
+                    maxZoom: 19
+                }).addTo(map);
+                log('✓ Basic map works!', 'success');
+            } catch (e) {
+                log('✗ Error: ' + e.message, 'error');
+            }
+        }
+
+        function testNewMarkers() {
+            try {
+                log('Testing new pin markers...', 'info');
+                if (!map) {
+                    testBasicMap();
+                }
+                
+                // Start marker
+                const startMarker = L.marker([40.7128, -74.0060], {
+                    icon: L.divIcon({
+                        className: 'route-marker start-marker',
+                        html: `<div class="marker-container">
+                            <div class="marker-pin start-pin">
+                                <i class="fas fa-circle"></i>
+                            </div>
+                            <div class="marker-shadow"></div>
+                        </div>`,
+                        iconSize: [40, 50],
+                        iconAnchor: [20, 50]
+                    })
+                }).addTo(map);
+                startMarker.bindPopup('Start Marker');
+                
+                // End marker
+                const endMarker = L.marker([40.7200, -74.0100], {
+                    icon: L.divIcon({
+                        className: 'route-marker end-marker',
+                        html: `<div class="marker-container">
+                            <div class="marker-pin end-pin">
+                                <i class="fas fa-location-dot"></i>
+                            </div>
+                            <div class="marker-shadow"></div>
+                        </div>`,
+                        iconSize: [40, 50],
+                        iconAnchor: [20, 50]
+                    })
+                }).addTo(map);
+                endMarker.bindPopup('End Marker');
+                
+                log('✓ New markers work!', 'success');
+            } catch (e) {
+                log('✗ Error: ' + e.message, 'error');
+            }
+        }
+
+        function testRoute() {
+            try {
+                log('Testing route drawing...', 'info');
+                if (!map) {
+                    testBasicMap();
+                }
+                
+                const route = L.polyline([
+                    [40.7128, -74.0060],
+                    [40.7200, -74.0100],
+                    [40.7250, -74.0050]
+                ], {
+                    color: '#3498db',
+                    weight: 5,
+                    opacity: 0.8
+                }).addTo(map);
+                
+                map.fitBounds(route.getBounds());
+                log('✓ Route drawing works!', 'success');
+            } catch (e) {
+                log('✗ Error: ' + e.message, 'error');
+            }
+        }
+
+        function testScript() {
+            log('Loading full script.js...', 'info');
+            const script = document.createElement('script');
+            script.src = 'script.js';
+            script.onload = () => log('✓ Script loaded!', 'success');
+            script.onerror = () => log('✗ Script failed to load!', 'error');
+            document.body.appendChild(script);
+        }
+
+        // Auto-run basic test
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                log('=== Starting Auto Tests ===', 'info');
+                testBasicMap();
+            }, 500);
+        });
+    </script>
+</body>
+</html>
